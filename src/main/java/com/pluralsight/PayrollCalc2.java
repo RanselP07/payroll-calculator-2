@@ -1,10 +1,8 @@
 package com.pluralsight;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 
@@ -12,25 +10,60 @@ public class PayrollCalc2 {
 
     static void main(String[] args) {
 
-        String fileName = "src/main/resources/employees.csv";
+        Scanner myScanner = new Scanner(System.in);
+        int counter = -1;
+
+        System.out.print("Enter the name of the file to process: ");
+        String inputFile = myScanner.nextLine().trim().toLowerCase();
+        String fileName = "src/main/resources/" + inputFile;
+
+        System.out.print("Enter the name of the payroll file to create: ");
+        String outputFile = myScanner.nextLine().trim().toLowerCase();
 
         try {
             BufferedReader bufReader = new BufferedReader(new FileReader(fileName));
             String line = bufReader.readLine();
             line = bufReader.readLine();
 
+            ArrayList<Integer> id = new ArrayList<>();
+            ArrayList<String> name = new ArrayList<>();
+            ArrayList<Double> pay = new ArrayList<>();
+
             while (line != null){
                 Employee employee = parseEmployee(line);
                 System.out.printf("%d %s %f \n", employee.getEmployeeID(), employee.getName(), employee.getGrossPay());
 
+                id.add(employee.getEmployeeID());
+                name.add(employee.getName());
+                pay.add(employee.getGrossPay());
+
+                counter++;
+
                 line = bufReader.readLine();
             }
 
+            try {
+                BufferedWriter bufWriter = new BufferedWriter(new FileWriter(outputFile));
+
+
+                for (int i = 0; i < counter; i++){
+                    String text = "id :" + id.get(i) + ", name: " + name.get(i) + ", grossPay: " + pay.get(i) + "\n";
+                    bufWriter.write(text);
+                }
+                bufWriter.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            bufReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("File does not exist.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        System.out.println();
 
     }
 
